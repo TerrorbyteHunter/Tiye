@@ -1,0 +1,22 @@
+{
+  "name": "@tiyende/utils",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "date-fns": "^3.3.1",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3",
+    "eslint": "^8.57.0"
+  }
+} 

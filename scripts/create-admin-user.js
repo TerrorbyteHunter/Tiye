@@ -1,0 +1,1 @@
+const query = `INSERT INTO admins (username, password, email, full_name, role, active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`; 

@@ -1,0 +1,18 @@
+{
+  "name": "tiyende-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@tiyende/vendor",
+    "dev:server": "npm run dev:server --workspace=@tiyende/vendor",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.81.4"
+  }
+}

@@ -1,0 +1,146 @@
+/* Default styles */
+.receipt-wrapper {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.receipt-content {
+  background-color: white;
+}
+
+@media print {
+  @page {
+    size: A5;
+    margin: 0;
+  }
+
+  /* Hide everything except receipt */
+  body > *:not(.receipt-wrapper) {
+    display: none !important;
+  }
+
+  /* Hide UI elements */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Show receipt content */
+  .receipt-content {
+    display: block !important;
+    visibility: visible !important;
+    background-color: white !important;
+    padding: 10mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 148mm !important; /* A5 width */
+    min-height: 210mm !important; /* A5 height */
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  /* Reset wrapper styles for printing */
+  .receipt-wrapper {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    background-color: white !important;
+  }
+
+  /* Force background colors and borders to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure QR code is visible */
+  .QRCodeSVG {
+    display: block !important;
+    visibility: visible !important;
+    margin: 0 auto !important;
+  }
+
+  /* QR code container */
+  .qr-container {
+    background-color: white !important;
+    padding: 1rem !important;
+    border-radius: 0.5rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    width: fit-content !important;
+  }
+
+  /* Ensure proper text colors */
+  .text-gray-600,
+  .text-gray-500 {
+    color: #4B5563 !important;
+  }
+
+  .text-gray-900 {
+    color: #111827 !important;
+  }
+
+  /* Ensure proper background colors */
+  .bg-gray-50 {
+    background-color: #F9FAFB !important;
+    border-radius: 0.5rem !important;
+  }
+
+  /* Ensure proper borders */
+  .border,
+  .border-t,
+  .border-gray-200 {
+    border-color: #E5E7EB !important;
+  }
+
+  /* Ensure proper spacing */
+  .mb-8 {
+    margin-bottom: 2rem !important;
+  }
+
+  .mb-6 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem !important;
+  }
+
+  .p-6 {
+    padding: 1.5rem !important;
+  }
+
+  .p-4 {
+    padding: 1rem !important;
+  }
+
+  .gap-6 {
+    gap: 1.5rem !important;
+  }
+
+  .gap-4 {
+    gap: 1rem !important;
+  }
+
+  .gap-2 {
+    gap: 0.5rem !important;
+  }
+
+  /* Ensure proper font sizes */
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.25rem !important;
+  }
+
+  .text-lg {
+    font-size: 1.125rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.875rem !important;
+  }
+} 

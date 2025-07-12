@@ -1,0 +1,21 @@
+{
+  "projects": {
+    "default": "tiyende-3811a"
+  },
+  "targets": {
+    "tiyende-3811a": {
+      "hosting": {
+        "admin": [
+          "tiyende-3811admin"
+        ],
+        "vendor": [
+          "tiyende-3811vendor"
+        ],
+        "user": [
+          "tiyende-3811a"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
