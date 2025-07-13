@@ -5,6 +5,7 @@ import winston from 'winston';
 import pkg from 'pg';
 const { Pool } = pkg;
 import bcrypt from 'bcryptjs';
+import { Request, Response, NextFunction } from 'express';
 
 // Log the loaded database URL
 console.log('DATABASE_URL loaded:', process.env.DATABASE_URL);
@@ -84,7 +85,7 @@ app.post('/api/user/sync', async (req, res) => {
       logger.info(`Admin user already exists for Firebase UID: ${uid}`);
     }
     res.json({ success: true });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`User sync error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to sync user' });
   }
@@ -115,7 +116,7 @@ app.post('/api/user/login', async (req, res) => {
     const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
     logger.info(`User login successful for mobile: ${mobile}, username: ${username}`);
     res.json({ token, user });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`User login error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to login' });
   }
@@ -147,14 +148,14 @@ app.post('/api/user/signup', async (req, res) => {
     const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
     logger.info(`User signup successful for username: ${username}`);
     res.json({ token, user });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`User signup error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to signup' });
   }
 });
 
 // Middleware to extract user from token (for demo purposes)
-function getUserIdFromToken(req) {
+function getUserIdFromToken(req: Request) {
   const auth = req.headers.authorization;
   if (!auth) return null;
   try {
@@ -176,7 +177,7 @@ app.get('/api/user/me', async (req, res) => {
     const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json(result.rows[0]);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get user profile error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get user profile' });
   }
@@ -204,7 +205,7 @@ app.patch('/api/user/me', async (req, res) => {
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
     const result = await pool.query(sql, values);
     res.json(result.rows[0]);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Update user profile error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to update user profile' });
   }
@@ -235,7 +236,7 @@ app.get('/api/user/routes', async (req, res) => {
     }
     console.log('ROUTES SENT:', result.rows); // Log the routes being sent
     res.json(result.rows);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get routes error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get routes' });
   }
@@ -248,7 +249,7 @@ app.get('/api/user/routes/:id', async (req, res) => {
     const result = await pool.query('SELECT * FROM routes WHERE id = $1', [id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Route not found' });
     res.json(result.rows[0]);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get route by id error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get route' });
   }
@@ -271,7 +272,7 @@ app.get('/api/user/routes/:routeId/seats', async (req, res) => {
       status: bookedSeats.has(i + 1) ? 'booked' : 'available',
     }));
     res.json({ routeId, travelDate, seats });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get seats error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get seats' });
   }
@@ -311,7 +312,7 @@ app.post('/api/tickets', async (req, res) => {
       ]
     );
     res.json(result.rows[0]);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Create ticket error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to create ticket' });
   }
@@ -362,7 +363,7 @@ app.get('/api/user/tickets', async (req, res) => {
       }
     }));
     res.json(tickets);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get user tickets error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get tickets' });
   }
@@ -375,7 +376,7 @@ app.get('/api/tickets/:id', async (req, res) => {
     const result = await pool.query('SELECT * FROM tickets WHERE id = $1', [id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Ticket not found' });
     res.json(result.rows[0]);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get ticket by id error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get ticket' });
   }
@@ -425,7 +426,7 @@ app.get('/api/user/tickets/reference/:bookingReference', async (req, res) => {
       }
     };
     res.json(ticket);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get ticket by reference error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get ticket' });
   }
@@ -439,7 +440,7 @@ app.get('/api/user/notifications', async (req, res) => {
     // For demo: fetch notifications for user (customize as needed for your schema)
     const result = await pool.query('SELECT * FROM notifications WHERE user_id = $1', [userId]);
     res.json(result.rows);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Get notifications error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get notifications' });
   }
@@ -451,7 +452,7 @@ app.patch('/api/user/notifications/:id/read', async (req, res) => {
     const { id } = req.params;
     await pool.query('UPDATE notifications SET read = TRUE WHERE id = $1', [id]);
     res.json({ success: true });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Mark notification as read error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to mark notification as read' });
   }
@@ -463,7 +464,7 @@ app.delete('/api/notifications/:id', async (req, res) => {
     const { id } = req.params;
     await pool.query('DELETE FROM notifications WHERE id = $1', [id]);
     res.json({ success: true });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Delete notification error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to delete notification' });
   }
@@ -476,7 +477,7 @@ app.patch('/api/notifications/read-all', async (req, res) => {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     await pool.query('UPDATE notifications SET read = TRUE WHERE user_id = $1', [userId]);
     res.json({ success: true });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Mark all notifications as read error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to mark all notifications as read' });
   }
@@ -494,14 +495,14 @@ app.patch('/api/tickets/:id/status', async (req, res) => {
     const result = await pool.query('UPDATE tickets SET status = $1 WHERE id = $2 AND user_id = $3 RETURNING *', [status, ticketId, userId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Ticket not found or not owned by user' });
     res.json(result.rows[0]);
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Update ticket status error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to update ticket status' });
   }
 });
 
 // Error handler (should be last)
-app.use((err, req, res, next) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(`Error: ${err.stack || err}`);
   res.status(500).json({ error: 'Internal server error' });
 });
