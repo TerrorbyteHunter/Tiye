@@ -1,15 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-require("dotenv/config");
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const winston_1 = __importDefault(require("winston"));
-const pg_1 = __importDefault(require("pg"));
-const { Pool } = pg_1.default;
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import winston from 'winston';
+import pkg from 'pg';
+const { Pool } = pkg;
+import bcrypt from 'bcryptjs';
 // Log the loaded database URL
 console.log('DATABASE_URL loaded:', process.env.DATABASE_URL);
 // If you use Firebase Admin, log its initialization (optional)
@@ -23,23 +18,23 @@ catch (e) {
     // Ignore if not using Firebase
 }
 // Winston logger setup
-const logger = winston_1.default.createLogger({
+const logger = winston.createLogger({
     level: 'info',
-    format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.printf((info) => {
+    format: winston.format.combine(winston.format.timestamp(), winston.format.printf((info) => {
         const { timestamp, level, message } = info;
         return `${timestamp} [${level.toUpperCase()}]: ${message}`;
     })),
     transports: [
-        new winston_1.default.transports.File({ filename: 'server.log' }),
-        new winston_1.default.transports.Console()
+        new winston.transports.File({ filename: 'server.log' }),
+        new winston.transports.Console()
     ]
 });
 // PostgreSQL connection
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
-const app = (0, express_1.default)();
-app.use((0, cors_1.default)({
+const app = express();
+app.use(cors({
     origin: [
         'http://localhost:6173', // user frontend (local)
         'https://tiyende-3811a.web.app', // Firebase deployed frontend
@@ -49,7 +44,7 @@ app.use((0, cors_1.default)({
     ],
     credentials: true
 }));
-app.use(express_1.default.json());
+app.use(express.json());
 // Log all requests
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.url}`);
@@ -101,7 +96,7 @@ app.post('/api/user/login', async (req, res) => {
         }
         const user = userResult.rows[0];
         // Check password
-        const valid = await bcryptjs_1.default.compare(password, user.password_hash);
+        const valid = await bcrypt.compare(password, user.password_hash);
         if (!valid) {
             logger.warn(`Invalid password for user: ${username}`);
             return res.status(401).json({ error: 'Invalid password' });
@@ -131,7 +126,7 @@ app.post('/api/user/signup', async (req, res) => {
             return res.status(409).json({ error: 'Username already exists' });
         }
         // Hash password
-        const password_hash = await bcryptjs_1.default.hash(password, 10);
+        const password_hash = await bcrypt.hash(password, 10);
         // Insert user (add dummy firebase_uid if required)
         const insert = await pool.query('INSERT INTO users (firebase_uid, username, mobile, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [`${username}-firebase`, username, mobile, password_hash]);
         const user = insert.rows[0];
@@ -513,7 +508,7 @@ app.use((err, req, res, next) => {
     logger.error(`Error: ${err.stack || err}`);
     res.status(500).json({ error: 'Internal server error' });
 });
-app.options('*', (0, cors_1.default)({
+app.options('*', cors({
     origin: [
         'http://localhost:6173',
         'https://tiyende-3811a.web.app',
