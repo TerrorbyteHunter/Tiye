@@ -25,7 +25,10 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `${timestamp} [${level.toUpperCase()}]: ${message}`)
+    winston.format.printf((info) => {
+      const { timestamp, level, message } = info;
+      return `${timestamp} [${level.toUpperCase()}]: ${message}`;
+    })
   ),
   transports: [
     new winston.transports.File({ filename: 'server.log' }),
@@ -265,7 +268,7 @@ app.get('/api/user/routes/:routeId/seats', async (req, res) => {
       'SELECT seat_number FROM tickets WHERE route_id = $1 AND travel_date = $2',
       [routeId, travelDate]
     );
-    const bookedSeats = new Set(bookedResult.rows.map(row => row.seat_number));
+    const bookedSeats = new Set(bookedResult.rows.map((row: any) => row.seat_number));
     // Build seat array
     const seats = Array.from({ length: 50 }, (_, i) => ({
       number: i + 1,
@@ -333,7 +336,7 @@ app.get('/api/user/tickets', async (req, res) => {
       JOIN routes ON tickets.route_id = routes.id
       WHERE tickets.user_id = $1
     `, [userId]);
-    const tickets = result.rows.map(row => ({
+    const tickets = result.rows.map((row: any) => ({
       ...row,
       seatNumber: row.seat_number,
       travelDate: row.travel_date,
