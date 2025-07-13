@@ -3,12 +3,12 @@ nixPkgs = ["nodejs_18"]
 
 [phases.build]
 cmds = [
-  "npm install -g pnpm",
-  "pnpm install",
-  "pnpm run build --filter apps/user"
+  "cd monorepo && npm install -g pnpm",
+  "cd monorepo && pnpm install",
+  "cd monorepo && pnpm run build --filter apps/user"
 ]
 
 [phases.start]
 cmds = [
-  "pnpm start --filter apps/user"
+  "cd monorepo && pnpm start --filter apps/user"
 ]
