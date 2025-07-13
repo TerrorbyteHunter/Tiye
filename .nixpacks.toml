@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ["nodejs_18"]
+
+[phases.build]
+cmds = [
+  "npm install -g pnpm",
+  "pnpm install",
+  "pnpm run build --filter apps/user"
+]
+
+[phases.start]
+cmds = [
+  "pnpm start --filter apps/user"
+]
