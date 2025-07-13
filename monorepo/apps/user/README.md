@@ -1,5 +1,18 @@
 # User App Backend (Tiyende)
 
+## Automated Dependency Lockfile Sync (Husky)
+
+This project uses [Husky](https://typicode.github.io/husky/) to automatically run `npm install` before every commit. This ensures that your `package-lock.json` is always up to date and in sync with `package.json`, which is required for successful CI/CD and Railway deployments.
+
+**How it works:**
+- On every commit, Husky runs `npm install`.
+- If you add or change dependencies, the lock file will be updated automatically.
+- Always commit the updated `package-lock.json` if it changes.
+
+No manual steps are needed—just commit as usual!
+
+---
+
 ## Overview
 This backend powers the user-facing app for Tiyende. It is built with Node.js, Express, and connects to a PostgreSQL database using the `pg` library (node-postgres). Authentication uses bcrypt for password hashing. Logging is handled by Winston.
 
