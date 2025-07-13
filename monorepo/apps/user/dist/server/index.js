@@ -39,8 +39,6 @@ app.use(cors({
         'http://localhost:6173', // user frontend (local)
         'https://tiyende-3811a.web.app', // Firebase deployed frontend
         'https://tiyende-3811a.firebaseapp.com', // Firebase Hosting frontend
-        'https://f723fd7d9649.ngrok-free.app', // old ngrok backend
-        'https://62a6b69a4faf.ngrok-free.app', // current ngrok backend
         ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
         ...(process.env.NODE_ENV === 'production' ? ['https://your-frontend-domain.com'] : [])
     ],
@@ -515,8 +513,7 @@ app.options('*', cors({
         'http://localhost:6173',
         'https://tiyende-3811a.web.app',
         'https://tiyende-3811a.firebaseapp.com', // Firebase Hosting frontend
-        'https://f723fd7d9649.ngrok-free.app',
-        'https://62a6b69a4faf.ngrok-free.app' // current ngrok backend
+        'https://your-frontend-domain.com'
     ],
     credentials: true
 }), (req, res) => {

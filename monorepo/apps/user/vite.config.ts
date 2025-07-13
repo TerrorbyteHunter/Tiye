@@ -13,13 +13,13 @@ export default defineConfig({
     port: 6173,
     allowedHosts: [
       'localhost',
-      'dc1a4e9ed86e.ngrok-free.app',
+      // 
     ],
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3000', // Change if your backend runs on a different port locally
         changeOrigin: true,
       },
     },
   },
-}) 
+})
