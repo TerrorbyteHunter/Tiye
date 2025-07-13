@@ -1,5 +1,4 @@
 {
-  "name": "tiyende-monorepo",
   "private": true,
   "workspaces": [
     "apps/*",
