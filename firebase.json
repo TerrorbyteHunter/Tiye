@@ -1,7 +1,7 @@
 {
   "hosting": [
     {
-      "target": "admin",
+      "target": "tiyende-3811admin",
       "public": "monorepo/apps/admin/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
@@ -9,7 +9,7 @@
       ]
     },
     {
-      "target": "user",
+      "target": "tiyende-3811a",
       "public": "monorepo/apps/user/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
@@ -17,7 +17,7 @@
       ]
     },
     {
-      "target": "vendor",
+      "target": "tiyende-3811vendor",
       "public": "monorepo/apps/vendor/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [

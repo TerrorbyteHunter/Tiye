@@ -5,13 +5,13 @@
   "targets": {
     "tiyende-3811a": {
       "hosting": {
-        "admin": [
+        "tiyende-3811admin": [
           "tiyende-3811admin"
         ],
-        "vendor": [
+        "tiyende-3811vendor": [
           "tiyende-3811vendor"
         ],
-        "user": [
+        "tiyende-3811a": [
           "tiyende-3811a"
         ]
       }

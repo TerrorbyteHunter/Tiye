@@ -1,4 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-export const EmergencyContacts = ({ contacts }) => {
-    return (_jsxs("div", { className: "bg-white rounded-lg shadow-sm p-6", children: [_jsx("h3", { className: "text-lg font-semibold text-gray-900 mb-4", children: "Emergency Contacts" }), _jsx("div", { className: "space-y-4", children: contacts.map((contact, index) => (_jsxs("div", { className: "flex flex-col", children: [_jsxs("div", { className: "flex items-center justify-between", children: [_jsx("span", { className: "text-sm font-medium text-gray-900", children: contact.name }), _jsx("span", { className: "text-xs text-gray-500", children: contact.type })] }), _jsx("a", { href: `tel:${contact.phone}`, className: "text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap", children: contact.phone })] }, index))) })] }));
-};
