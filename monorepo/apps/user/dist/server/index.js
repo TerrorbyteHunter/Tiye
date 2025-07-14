@@ -260,6 +260,7 @@ app.get('/api/user/routes', async (req, res) => {
     }
     catch (err) {
         logger.error(`Get routes error: ${err.stack || err}`);
+        console.error('Get routes error:', err); // <-- Added for Render logs
         res.status(500).json({ error: 'Failed to get routes' });
     }
 });
