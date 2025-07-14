@@ -45,11 +45,10 @@ const app = express();
 
 app.use(cors({
   origin: [
-    'http://localhost:6173', // user frontend (local)
-    'https://tiyende-3811a.web.app', // Firebase deployed frontend
-    'https://tiyende-3811a.firebaseapp.com', // Firebase Hosting frontend
-    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
-    ...(process.env.NODE_ENV === 'production' ? ['https://your-frontend-domain.com'] : [])
+    'http://localhost:6173',
+    'https://tiyende-3811a.web.app',
+    'https://tiyende-3811a.firebaseapp.com',
+    'https://tiye.onrender.com'
   ],
   credentials: true
 }));
@@ -514,8 +513,8 @@ app.options('*', cors({
   origin: [
     'http://localhost:6173',
     'https://tiyende-3811a.web.app',
-    'https://tiyende-3811a.firebaseapp.com', // Firebase Hosting frontend
-    'https://your-frontend-domain.com'
+    'https://tiyende-3811a.firebaseapp.com',
+    'https://tiye.onrender.com'
   ],
   credentials: true
 }), (req, res) => {
