@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "tsx server/index.ts",
-    "build": "vite build",
+    "build:client": "vite build",
     "build:server": "tsc && tsc -p tsconfig.server.json",
+    "build": "pnpm run build:client && pnpm run build:server",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "node dist/server/index.js",
