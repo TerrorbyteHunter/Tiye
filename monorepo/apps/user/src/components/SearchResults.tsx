@@ -59,9 +59,11 @@ const timeRanges: TimeRange[] = [
 
 // Helper to format time as HH:mm
 const formatTime = (timeString: string): string => {
-  if (!timeString) return '';
+  if (!timeString) return 'N/A';
+  // If it's a time-only string (e.g., '08:00' or '08:00:00'), just return the first 5 chars
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeString)) return timeString.slice(0,5);
   const date = new Date(timeString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  return isNaN(date.getTime()) ? 'N/A' : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
 export const SearchResults: React.FC = () => {
@@ -115,7 +117,8 @@ export const SearchResults: React.FC = () => {
             amenities: route.amenities || [],
             from: route.departure || route.from || '',
             to: route.destination || route.to || '',
-            date: date || '',
+            // Use the backend's departureTime as the date for each bus
+            date: (route.departureTime || route.departure_time || route.departTime || route.depart || '').split('T')[0],
             vendorId: route.vendorid || route.vendorId || 1,
           }));
         setBuses(mappedBuses);
@@ -129,6 +132,14 @@ export const SearchResults: React.FC = () => {
 
   // Debug log for search/filter state
   console.log({ from, to, date, buses });
+  if (buses.length > 0) {
+    buses.forEach((bus, idx) => {
+      console.log(`Bus #${idx + 1}:`, {
+        departureTime: bus.departureTime,
+        arrivalTime: bus.arrivalTime,
+      });
+    });
+  }
 
   const handleSelectBus = (busId: string) => {
     // Find the selected bus
@@ -245,10 +256,9 @@ export const SearchResults: React.FC = () => {
                       <span className="mx-1 text-gray-400 sm:mx-2">→</span>
                       <span className="font-bold text-green-600">{bus.to}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-gray-500 sm:text-sm sm:gap-6">
-                      <span><span className="font-semibold text-gray-700">{formatTime(bus.departureTime)}</span></span>
-                      <span>-</span>
-                      <span><span className="font-semibold text-gray-700">{formatTime(bus.arrivalTime)}</span></span>
+                    <div className="flex items-center gap-3 text-[11px] text-gray-500 sm:text-sm sm:gap-6">
+                      <span><span className="font-semibold text-gray-700">Departure:</span> {formatTime(bus.departureTime)}</span>
+                      <span><span className="font-semibold text-gray-700">Arrival:</span> {formatTime(bus.arrivalTime)}</span>
                     </div>
                   </div>
                   {/* Amenities, Seats, Bus Type, Button (all in one row for mobile) */}

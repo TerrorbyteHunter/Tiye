@@ -34,9 +34,20 @@ export const auth = {
         }
         return response.data;
     },
+    googleAuth: async (idToken) => {
+        const response = await api.post('/user/google-auth', { idToken });
+        if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+        }
+        return response.data;
+    },
 };
 export const routes = {
-    getAll: () => api.get('/user/routes'),
+    getAll: async () => {
+        const response = await api.get('/user/routes');
+        console.log('API /user/routes response:', response.data);
+        return response;
+    },
     getById: (id) => api.get(`/user/routes/${id}`),
     getByVendor: (vendorId) => api.get(`/user/routes?vendor=${vendorId}`),
     getSeats: (routeId, travelDate) => {

@@ -8,6 +8,8 @@ import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
 import admin from 'firebase-admin';
 
+console.log('=== index.ts loaded ===');
+
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -224,6 +226,7 @@ app.patch('/api/user/me', async (req, res) => {
 
 // GET /api/user/routes (optionally filter by vendor)
 app.get('/api/user/routes', async (req, res) => {
+  console.log('==== /api/user/routes endpoint HIT ====');
   try {
     const { vendor } = req.query;
     let result;
@@ -245,8 +248,21 @@ app.get('/api/user/routes', async (req, res) => {
         JOIN vendors ON routes.vendorid = vendors.id
       `);
     }
-    console.log('ROUTES SENT:', result.rows); // Log the routes being sent
-    res.json(result.rows);
+    // Log the type and value of estimatedarrival for debugging
+    if (result.rows.length > 0) {
+      console.log('Sample estimatedarrival:', result.rows[0]?.estimatedarrival, typeof result.rows[0]?.estimatedarrival, result.rows[0]?.estimatedarrival instanceof Date);
+    }
+    // Format departureTime and arrivalTime as 'HH:mm' strings
+    const formattedRows = result.rows.map((row) => {
+      return {
+        ...row,
+        departureTime: row.departuretime ? row.departuretime.slice(0,5) : '',
+        arrivalTime: row.estimatedArrival ? row.estimatedArrival.slice(11,16) : (row.estimatedarrival ? row.estimatedarrival.slice(11,16) : ''),
+        testField: 'THIS IS THE TEST FIELD',
+      };
+    });
+    console.log('ROUTES SENT:', formattedRows); // Log the routes being sent
+    res.json(formattedRows);
   } catch (err: any) {
     logger.error(`Get routes error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to get routes' });
@@ -293,6 +309,7 @@ app.get('/api/user/routes/:routeId/seats', async (req, res) => {
 app.post('/api/tickets', async (req, res) => {
   try {
     let { userId, routeId, seatNumber, travelDate, customerName, customerPhone, amount, status, bookingReference, customerEmail } = req.body;
+    console.log('Booking ticket for userId:', userId);
     // Generate bookingReference if not provided
     if (!bookingReference) {
       bookingReference = `TKT${Date.now()}${Math.floor(Math.random() * 10000)}`;
@@ -322,6 +339,12 @@ app.post('/api/tickets', async (req, res) => {
         customerEmail || null
       ]
     );
+    // Add notification for the user
+    const notifResult = await pool.query(
+      'INSERT INTO notifications (user_id, message, read) VALUES ($1, $2, $3) RETURNING *',
+      [userId, 'Your booking was successful!', false]
+    );
+    console.log('Notification inserted:', notifResult.rows[0]);
     res.json(result.rows[0]);
   } catch (err: any) {
     logger.error(`Create ticket error: ${err.stack || err}`);
@@ -447,9 +470,11 @@ app.get('/api/user/tickets/reference/:bookingReference', async (req, res) => {
 app.get('/api/user/notifications', async (req, res) => {
   try {
     const userId = getUserIdFromToken(req);
+    console.log('Fetching notifications for userId:', userId);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     // For demo: fetch notifications for user (customize as needed for your schema)
     const result = await pool.query('SELECT * FROM notifications WHERE user_id = $1', [userId]);
+    console.log('Notifications found:', result.rows.length);
     res.json(result.rows);
   } catch (err: any) {
     logger.error(`Get notifications error: ${err.stack || err}`);
@@ -541,7 +566,7 @@ app.post('/api/user/google-auth', async (req, res) => {
     // Generate a simple token (for demo purposes only)
     const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
     res.json({ token, user });
-  } catch (err) {
+  } catch (err: any) {
     logger.error(`Google auth error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to authenticate with Google' });
   }

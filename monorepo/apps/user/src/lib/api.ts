@@ -39,10 +39,21 @@ export const auth = {
     }
     return response.data;
   },
+  googleAuth: async (idToken: string) => {
+    const response = await api.post<any>('/user/google-auth', { idToken });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
 };
 
 export const routes = {
-  getAll: () => api.get<Route[]>('/user/routes'),
+  getAll: async () => {
+    const response = await api.get<Route[]>('/user/routes');
+    console.log('API /user/routes response:', response.data);
+    return response;
+  },
   getById: (id: number) => api.get<Route>(`/user/routes/${id}`),
   getByVendor: (vendorId: number) => api.get<Route[]>(`/user/routes?vendor=${vendorId}`),
   getSeats: (routeId: string | number, travelDate?: string) => {
