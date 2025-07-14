@@ -241,6 +241,9 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.21.2
+      firebase-admin:
+        specifier: ^13.4.0
+        version: 13.4.0
       html2pdf.js:
         specifier: ^0.10.3
         version: 0.10.3

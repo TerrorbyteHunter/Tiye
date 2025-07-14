@@ -6,6 +6,12 @@ import pkg from 'pg';
 const { Pool } = pkg;
 import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
+import admin from 'firebase-admin';
+
+// Initialize Firebase Admin if not already initialized
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 // Log the loaded database URL
 console.log('DATABASE_URL loaded:', process.env.DATABASE_URL);
@@ -503,6 +509,41 @@ app.patch('/api/tickets/:id/status', async (req, res) => {
   } catch (err: any) {
     logger.error(`Update ticket status error: ${err.stack || err}`);
     res.status(500).json({ error: 'Failed to update ticket status' });
+  }
+});
+
+// Google Auth endpoint
+app.post('/api/user/google-auth', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ error: 'Missing idToken' });
+    }
+    // Verify the ID token
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const { uid, email, name } = decoded;
+    if (!email) {
+      return res.status(400).json({ error: 'No email in Google account' });
+    }
+    // Check if user exists
+    let userResult = await pool.query('SELECT * FROM users WHERE firebase_uid = $1', [uid]);
+    let user;
+    if (userResult.rows.length === 0) {
+      // Create new user
+      const insert = await pool.query(
+        'INSERT INTO users (firebase_uid, username, mobile, password_hash) VALUES ($1, $2, $3, $4) RETURNING *',
+        [uid, email, '', '']
+      );
+      user = insert.rows[0];
+    } else {
+      user = userResult.rows[0];
+    }
+    // Generate a simple token (for demo purposes only)
+    const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+    res.json({ token, user });
+  } catch (err) {
+    logger.error(`Google auth error: ${err.stack || err}`);
+    res.status(500).json({ error: 'Failed to authenticate with Google' });
   }
 });
 
