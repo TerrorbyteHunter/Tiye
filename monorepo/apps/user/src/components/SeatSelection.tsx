@@ -35,6 +35,13 @@ const formatTime = (timeString: string): string => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
+// Helper to ensure a valid YYYY-MM-DD date string
+const getValidDate = (date: string) => {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+};
+
 export const SeatSelection: React.FC = () => {
   const { busId } = useParams();
   const navigate = useNavigate();
@@ -56,8 +63,15 @@ export const SeatSelection: React.FC = () => {
         return;
       }
       setIsLoading(true);
+      const validDate = getValidDate(busData.bus.date);
+      if (!validDate) {
+        setSeats([]);
+        setIsLoading(false);
+        setWarning('Invalid travel date selected. Please go back and choose a valid date.');
+        return;
+      }
       try {
-        const response = await routesApi.getSeats(busData.bus.id, busData.bus.date);
+        const response = await routesApi.getSeats(busData.bus.id, validDate);
         const backendSeats = response.data.seats || [];
         const mappedSeats: Seat[] = backendSeats.map((seat: any) => ({
           id: seat.number,
