@@ -59,11 +59,17 @@ export function Checkout() {
             return {};
         }
     })();
-    const userName = user.name || user.fullName || '';
+    // Robust fallback for userName
+    const userName = user.name || user.fullName || user.username || user.mobile || 'Customer';
     const userPhone = user.mobile || user.phone || user.username || '';
     const userEmail = user.email || '';
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Pre-check for required fields
+        if (!bus.date || !userName) {
+            alert('Missing travel date or customer name. Please go back and select your trip again.');
+            return;
+        }
         setIsProcessing(true);
         let bookingError = '';
         let successfulBookings = 0;
