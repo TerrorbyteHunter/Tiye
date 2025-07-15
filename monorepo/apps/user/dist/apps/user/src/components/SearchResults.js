@@ -79,8 +79,7 @@ export const SearchResults = () => {
                     amenities: route.amenities || [],
                     from: route.departure || route.from || '',
                     to: route.destination || route.to || '',
-                    // Use the backend's departureTime as the date for each bus
-                    date: getValidDate(route.departureTime || route.departure_time || route.departTime || route.depart || ''),
+                    date: route.date, // Use backend's date field directly
                     vendorId: route.vendorid || route.vendorId || 1,
                 }));
                 setBuses(mappedBuses);
@@ -111,11 +110,11 @@ export const SearchResults = () => {
                 state: {
                     bus: {
                         ...selectedBus,
-                        date: getValidDate(selectedBus.date)
+                        date: selectedBus.date || date // fallback to search param if backend date is missing
                     },
                     from: selectedBus.from,
                     to: selectedBus.to,
-                    date: getValidDate(selectedBus.date),
+                    date: selectedBus.date || date, // fallback to search param if backend date is missing
                     departureTime: selectedBus.departureTime,
                     arrivalTime: selectedBus.arrivalTime,
                     price: selectedBus.price,

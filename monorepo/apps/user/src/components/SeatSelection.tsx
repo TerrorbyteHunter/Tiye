@@ -63,13 +63,7 @@ export const SeatSelection: React.FC = () => {
         return;
       }
       setIsLoading(true);
-      const validDate = getValidDate(busData.bus.date);
-      if (!validDate) {
-        setSeats([]);
-        setIsLoading(false);
-        setWarning('Invalid travel date selected. Please go back and choose a valid date.');
-        return;
-      }
+      const validDate = getValidDate(busData.bus.date) || '';
       try {
         const response = await routesApi.getSeats(busData.bus.id, validDate);
         const backendSeats = response.data.seats || [];
@@ -145,6 +139,15 @@ export const SeatSelection: React.FC = () => {
     );
   }
 
+  // Combine date and time for display
+  const fullDateTime = busData.bus.date && busData.bus.departureTime ? `${busData.bus.date}T${busData.bus.departureTime}` : '';
+  const displayDate = busData.bus.date
+    ? (fullDateTime && !isNaN(new Date(fullDateTime).getTime())
+        ? new Date(fullDateTime).toLocaleDateString('en-GB')
+        : new Date(busData.bus.date).toLocaleDateString('en-GB'))
+    : 'N/A';
+  const displayTime = busData.bus.departureTime || 'N/A';
+
   return (
     <div className="min-h-screen py-8 flex flex-col" style={{ background: 'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 50%, #d4a1fd 100%)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -169,8 +172,8 @@ export const SeatSelection: React.FC = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 items-center pt-8">
                     <div className="flex items-center gap-1 sm:gap-2"><span style={{width:16,height:16,display:'inline-flex',alignItems:'center'}}><FaMapMarkerAlt color="#3B82F6" /></span> <span className="text-xs sm:text-sm text-gray-500">From</span> <span className="font-medium ml-1 text-xs sm:text-sm">{busData.bus.from}</span></div>
                     <div className="flex items-center gap-1 sm:gap-2"><span style={{width:16,height:16,display:'inline-flex',alignItems:'center'}}><FaMapMarkerAlt color="#059669" /></span> <span className="text-xs sm:text-sm text-gray-500">To</span> <span className="font-medium ml-1 text-xs sm:text-sm">{busData.bus.to}</span></div>
-                    <div className="flex items-center gap-1 sm:gap-2"><span style={{width:16,height:16,display:'inline-flex',alignItems:'center'}}><FaCalendarAlt color="#F59E42" /></span> <span className="text-xs sm:text-sm text-gray-500">Date</span> <span className="font-medium ml-1 text-xs sm:text-sm">{new Date(busData.bus.date).toLocaleDateString('en-GB')}</span></div>
-                    <div className="flex items-center gap-1 sm:gap-2"><span style={{width:16,height:16,display:'inline-flex',alignItems:'center'}}><FaClock color="#6366F1" /></span> <span className="text-xs sm:text-sm text-gray-500">Time</span> <span className="font-medium ml-1 text-xs sm:text-sm">{formatTime(busData.bus.departureTime)}</span></div>
+                    <div className="flex items-center gap-1 sm:gap-2"><span style={{width:16,height:16,display:'inline-flex',alignItems:'center'}}><FaCalendarAlt color="#F59E42" /></span> <span className="text-xs sm:text-sm text-gray-500">Date</span> <span className="font-medium ml-1 text-xs sm:text-sm">{displayDate}</span></div>
+                    <div className="flex items-center gap-1 sm:gap-2"><span style={{width:16,height:16,display:'inline-flex',alignItems:'center'}}><FaClock color="#6366F1" /></span> <span className="text-xs sm:text-sm text-gray-500">Time</span> <span className="font-medium ml-1 text-xs sm:text-sm">{displayTime}</span></div>
                   </div>
                 </div>
 
@@ -307,7 +310,6 @@ export const SeatSelection: React.FC = () => {
                   <span>Selected Seats: <span className="font-semibold text-blue-700">{selectedSeats.join(', ') || 'None'}</span></span>
                   <span>Total Price: <span className="font-semibold text-green-600">K {totalPrice}</span></span>
                 </div>
-                {warning && <div className="mt-4 text-red-500 font-semibold">{warning}</div>}
                 <button
                   className="mt-6 w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-bold rounded-lg shadow-md transition-colors disabled:opacity-50"
                   disabled={selectedSeats.length === 0}

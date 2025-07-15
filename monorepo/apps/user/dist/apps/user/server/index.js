@@ -329,18 +329,28 @@ app.get('/api/user/routes/:routeId/seats', async (req, res) => {
 app.post('/api/tickets', async (req, res) => {
     try {
         let { userId, routeId, seatNumber, travelDate, customerName, customerPhone, amount, status, bookingReference, customerEmail } = req.body;
-        console.log('Booking ticket for userId:', userId);
+        console.log('--- /api/tickets booking attempt ---');
+        console.log('Payload:', req.body);
+        // Validate required fields
+        if (!userId || !routeId || !seatNumber || !travelDate || !customerName || !customerPhone || !amount || !status) {
+            console.warn('Missing required field(s) in ticket booking:', req.body);
+            return res.status(400).json({ error: 'Missing required field(s) for ticket booking.' });
+        }
         // Generate bookingReference if not provided
         if (!bookingReference) {
             bookingReference = `TKT${Date.now()}${Math.floor(Math.random() * 10000)}`;
         }
         // Look up vendorid from the route
+        console.log('Looking up vendorid for routeId:', routeId);
         const routeResult = await pool.query('SELECT vendorid FROM routes WHERE id = $1', [routeId]);
         if (routeResult.rows.length === 0) {
+            console.warn('Invalid routeId:', routeId);
             return res.status(400).json({ error: 'Invalid routeId' });
         }
         const vendorId = routeResult.rows[0].vendorid;
+        console.log('Found vendorId:', vendorId);
         // Insert ticket with all required fields (excluding bookingDate)
+        console.log('Inserting ticket...');
         const result = await pool.query(`INSERT INTO tickets (
         user_id, route_id, seat_number, travel_date, vendorid, customer_name, customer_phone, amount, status, booking_reference, customer_email
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`, [
@@ -356,13 +366,18 @@ app.post('/api/tickets', async (req, res) => {
             bookingReference,
             customerEmail || null
         ]);
-        // Add notification for the user
-        const notifResult = await pool.query('INSERT INTO notifications (user_id, message, read) VALUES ($1, $2, $3) RETURNING *', [userId, 'Your booking was successful!', false]);
-        console.log('Notification inserted:', notifResult.rows[0]);
+        console.log('Ticket inserted:', result.rows[0]);
+        // Send response immediately after booking
         res.json(result.rows[0]);
+        // Try to insert notification, but don't block or error if it fails
+        pool.query('INSERT INTO notifications (user_id, message, read) VALUES ($1, $2, $3) RETURNING *', [userId, 'Your booking was successful!', false]).then(notifResult => {
+            console.log('Notification inserted:', notifResult.rows[0]);
+        }).catch(err => {
+            console.error('Notification insert failed:', err);
+        });
     }
     catch (err) {
-        logger.error(`Create ticket error: ${err.stack || err}`);
+        console.error('Create ticket error:', err);
         res.status(500).json({ error: 'Failed to create ticket' });
     }
 });
