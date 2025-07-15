@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { user, tickets } from '../lib/api';
 import { LogOut, User2, Pencil, Bell, HelpCircle, Ticket } from 'lucide-react';
+import { useIsMobile } from '../hooks/use-responsive';
+import ReactDOM from 'react-dom';
 
 const tiles = [
   { to: '/profile/edit', icon: <Pencil className="h-6 w-6 text-blue-600" />, label: 'Edit Profile' },
@@ -12,9 +14,11 @@ const tiles = [
 
 const ProfileMain: React.FC = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -64,14 +68,24 @@ const ProfileMain: React.FC = () => {
                 <ProfileTile key={tile.to} to={tile.to} icon={tile.icon} label={tile.label} />
               ))}
             </div>
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-lg font-semibold rounded-lg shadow hover:from-red-600 hover:to-pink-600 transition"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
-            </button>
+            {/* Logout Button (mobile only) */}
+            {isMobile && (
+              <>
+                <button
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-lg font-semibold rounded-lg shadow hover:from-red-600 hover:to-pink-600 transition mt-4"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+                {showLogoutConfirm && (
+                  <LogoutConfirmModal
+                    onConfirm={handleLogout}
+                    onCancel={() => setShowLogoutConfirm(false)}
+                  />
+                )}
+              </>
+            )}
           </>
         )}
       </div>
@@ -88,6 +102,33 @@ function ProfileTile({ to, icon, label }: { to: string; icon: React.ReactNode; l
       <span className="mb-1">{icon}</span>
       <span className="font-medium text-gray-700 text-base">{label}</span>
     </Link>
+  );
+}
+
+// Simple logout confirmation modal
+function LogoutConfirmModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto relative">
+        <h2 className="text-lg font-bold mb-4 text-center">Confirm Logout</h2>
+        <p className="mb-6 text-center text-gray-700">Are you sure you want to log out?</p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-2 rounded bg-red-500 text-white font-semibold hover:bg-red-600 transition"
+          >
+            Log Out
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 

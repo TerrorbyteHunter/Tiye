@@ -124,7 +124,7 @@ function AppContent() {
             <span className="mb-1"><FaInfoCircle size={24} color="#4b5563" /></span>
             <span className="text-xs">Info</span>
           </button>
-          <button className="flex flex-col items-center text-purple-600 font-semibold focus:outline-none" onClick={() => navigate('/profile/edit')}> 
+          <button className="flex flex-col items-center text-purple-600 font-semibold focus:outline-none" onClick={() => navigate('/profile')}> 
             <span className="mb-1"><FaCog size={24} color="#7c3aed" /></span>
             <span className="text-xs">Manage</span>
           </button>

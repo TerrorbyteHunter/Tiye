@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import winston from 'winston';
+import morgan from 'morgan';
 import pkg from 'pg';
 const { Pool } = pkg;
 import bcrypt from 'bcryptjs';
@@ -64,6 +65,13 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// Use morgan with Winston for detailed HTTP request logging
+app.use(morgan('combined', {
+  stream: {
+    write: (message: string) => logger.info(message.trim())
+  }
+}));
 
 // Log all requests
 app.use((req, res, next) => {
@@ -253,11 +261,28 @@ app.get('/api/user/routes', async (req, res) => {
       console.log('Sample estimatedarrival:', result.rows[0]?.estimatedarrival, typeof result.rows[0]?.estimatedarrival, result.rows[0]?.estimatedarrival instanceof Date);
     }
     // Format departureTime and arrivalTime as 'HH:mm' strings
+    const getArrivalTime = (val: any) => {
+      if (!val) return '';
+      if (typeof val === 'string') {
+        return val.slice(11, 16);
+      }
+      if (val instanceof Date) {
+        return val.toISOString().slice(11, 16);
+      }
+      if (typeof val.toString === 'function') {
+        try {
+          return val.toString().slice(11, 16);
+        } catch {
+          return '';
+        }
+      }
+      return '';
+    };
     const formattedRows = result.rows.map((row) => {
       return {
         ...row,
         departureTime: row.departuretime ? row.departuretime.slice(0,5) : '',
-        arrivalTime: row.estimatedArrival ? row.estimatedArrival.slice(11,16) : (row.estimatedarrival ? row.estimatedarrival.slice(11,16) : ''),
+        arrivalTime: getArrivalTime(row.estimatedArrival || row.estimatedarrival),
         testField: 'THIS IS THE TEST FIELD',
       };
     });
