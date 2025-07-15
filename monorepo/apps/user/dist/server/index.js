@@ -228,7 +228,7 @@ app.patch('/api/user/me', async (req, res) => {
 app.get('/api/user/routes', async (req, res) => {
     console.log('==== /api/user/routes endpoint HIT ====');
     try {
-        const { vendor } = req.query;
+        const { vendor, date } = req.query;
         let result;
         if (vendor) {
             result = await pool.query(`
@@ -276,6 +276,7 @@ app.get('/api/user/routes', async (req, res) => {
         const formattedRows = result.rows.map((row) => {
             return {
                 ...row,
+                date: date || '', // Add the searched date to each route
                 departureTime: row.departuretime ? row.departuretime.slice(0, 5) : '',
                 arrivalTime: getArrivalTime(row.estimatedArrival || row.estimatedarrival),
                 testField: 'THIS IS THE TEST FIELD',
