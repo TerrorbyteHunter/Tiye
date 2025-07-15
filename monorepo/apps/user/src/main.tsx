@@ -78,7 +78,9 @@ function AppContent() {
         <div className="fixed top-0 left-0 right-0 z-50 px-0 sm:px-0">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2 bg-white shadow-md border-b border-gray-100">
-            <img src="/images/logo.png" alt="Tiyende Logo" className="h-10 w-auto object-contain" />
+            <button onClick={() => navigate('/')} className="focus:outline-none">
+              <img src="/images/logo.png" alt="Tiyende Logo" className="h-10 w-auto object-contain" />
+            </button>
             <button className="p-2 rounded-full bg-white shadow-md hover:bg-blue-50 transition flex items-center justify-center" onClick={() => navigate('/notifications')} aria-label="Notifications">
               <Bell size={24} color="#2563eb" style={{ filter: 'drop-shadow(0 2px 4px rgba(37,99,235,0.15))' }} />
             </button>

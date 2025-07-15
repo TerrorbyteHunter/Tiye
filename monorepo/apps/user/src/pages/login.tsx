@@ -77,12 +77,14 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 via-blue-100 to-blue-300">
       <div className="w-full max-w-md p-10 rounded-3xl shadow-2xl bg-white/80 border border-blue-100 backdrop-blur-md transition-all duration-300 animate-fade-in">
         <div className="flex justify-center mb-4">
-          <img
-            src="/images/logo.png"
-            alt="Tiyende Logo"
-            className="h-10 w-auto mx-auto mb-2 object-contain rounded-lg shadow"
-            style={{ background: 'white', padding: '4px' }}
-          />
+          <button onClick={() => navigate('/')} className="focus:outline-none">
+            <img
+              src="/images/logo.png"
+              alt="Tiyende Logo"
+              className="h-10 w-auto mx-auto mb-2 object-contain rounded-lg shadow"
+              style={{ background: 'white', padding: '4px' }}
+            />
+          </button>
         </div>
         <h2 className="text-4xl font-extrabold text-blue-700 mb-2 text-center tracking-tight font-sans">Welcome to Tiyende</h2>
         <p className="text-center text-gray-500 mb-8 text-lg font-medium">Your smart way to book bus tickets in Zambia</p>
