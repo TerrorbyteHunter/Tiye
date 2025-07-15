@@ -66,6 +66,13 @@ const formatTime = (timeString: string): string => {
   return isNaN(date.getTime()) ? 'N/A' : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
+// Helper to ensure a valid YYYY-MM-DD date string
+const getValidDate = (dateString: string) => {
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
+};
+
 export const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -118,7 +125,7 @@ export const SearchResults: React.FC = () => {
             from: route.departure || route.from || '',
             to: route.destination || route.to || '',
             // Use the backend's departureTime as the date for each bus
-            date: (route.departureTime || route.departure_time || route.departTime || route.depart || '').split('T')[0],
+            date: getValidDate(route.departureTime || route.departure_time || route.departTime || route.depart || ''),
             vendorId: route.vendorid || route.vendorId || 1,
           }));
         setBuses(mappedBuses);
@@ -148,10 +155,13 @@ export const SearchResults: React.FC = () => {
       // Navigate with bus data
       navigate(`/select-seats/${busId}`, {
         state: {
-          bus: selectedBus,
+          bus: {
+            ...selectedBus,
+            date: getValidDate(selectedBus.date)
+          },
           from: selectedBus.from,
           to: selectedBus.to,
-          date: selectedBus.date,
+          date: getValidDate(selectedBus.date),
           departureTime: selectedBus.departureTime,
           arrivalTime: selectedBus.arrivalTime,
           price: selectedBus.price,
