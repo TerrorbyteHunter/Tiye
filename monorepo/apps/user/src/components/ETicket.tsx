@@ -15,11 +15,22 @@ const ETicket: React.FC<{ ticket: any; onDownload?: () => void; isExporting?: bo
       year: 'numeric'
     });
   };
-  // Helper to format time as HH:mm
-  const formatTime = (timeString: string): string => {
+  // Helper to format time as HH:mm, combining date and time if needed
+  const formatTime = (dateString: string | undefined, timeString: string | undefined): string => {
     if (!timeString) return '';
-    const date = new Date(timeString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    // If timeString is already a full ISO string, use it directly
+    let dateObj;
+    if (timeString.length > 8) {
+      dateObj = new Date(timeString);
+    } else if (dateString) {
+      // Combine date and time (e.g., 2025-07-17 + 04:00:00)
+      dateObj = new Date(`${dateString}T${timeString}`);
+    } else {
+      // Fallback: try parsing time only (will be invalid)
+      dateObj = new Date(timeString);
+    }
+    if (isNaN(dateObj.getTime())) return '';
+    return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   };
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-blue-100 overflow-hidden max-w-2xl mx-auto">
@@ -53,8 +64,8 @@ const ETicket: React.FC<{ ticket: any; onDownload?: () => void; isExporting?: bo
               <div className="flex items-center gap-1 sm:gap-2"><FaCalendarAlt color="#6366F1" size={14} /> <span>Date:</span> <span className="font-medium">{formatDate(ticket.travelDate || ticket.bookingDate)}</span></div>
               <div className="flex items-center gap-1 sm:gap-2"><FaChair color="#A78BFA" size={14} /> <span>Seat:</span> <span className="font-medium text-base sm:text-lg">{ticket.seatNumber}</span></div>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2"><FaClock color="#F59E0B" size={14} /> <span>Departure:</span> <span className="font-medium">{formatTime(ticket.route?.departureTime || ticket.departureTime)}</span></div>
-            <div className="flex items-center gap-1 sm:gap-2"><FaClock color="#34D399" size={14} /> <span>Arrival:</span> <span className="font-medium">{formatTime(ticket.route?.estimatedArrival)}</span></div>
+            <div className="flex items-center gap-1 sm:gap-2"><FaClock color="#F59E0B" size={14} /> <span>Departure:</span> <span className="font-medium">{formatTime(ticket.travelDate || ticket.bookingDate, ticket.route?.departureTime || ticket.departureTime)}</span></div>
+            <div className="flex items-center gap-1 sm:gap-2"><FaClock color="#34D399" size={14} /> <span>Arrival:</span> <span className="font-medium">{formatTime(ticket.travelDate || ticket.bookingDate, ticket.route?.estimatedArrival)}</span></div>
           </div>
         </div>
         {/* Payment Details */}

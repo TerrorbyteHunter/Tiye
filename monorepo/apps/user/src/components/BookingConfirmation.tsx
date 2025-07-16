@@ -65,6 +65,17 @@ export const BookingConfirmation: React.FC = () => {
   // Generate booking reference
   const bookingRef = `TKT${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+  // Get user info from localStorage
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  // Robust fallback for userName
+  const userName = user.name || user.fullName || user.username || user.mobile || 'Customer';
+
   useEffect(() => {
     const fetchStops = async () => {
       try {
@@ -118,7 +129,12 @@ export const BookingConfirmation: React.FC = () => {
               amount: totalPrice,
               paymentMethod: 'Mobile Money',
               customerPhone: phoneNumber,
-              route: { departureTime: bus.departureTime }
+              customerName: userName, // Add passenger name
+              vendorName: bus.company, // Add vendor name
+              route: { 
+                departureTime: bus.departureTime,
+                estimatedArrival: bus.arrivalTime // Add arrival time
+              }
             }} onDownload={handleExportPDF} isExporting={isExporting} />
           </div>
           <div className="flex justify-center">

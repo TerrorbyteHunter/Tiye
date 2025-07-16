@@ -37,6 +37,17 @@ export const BookingConfirmation = () => {
     };
     // Generate booking reference
     const bookingRef = `TKT${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    // Get user info from localStorage
+    const user = (() => {
+        try {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        }
+        catch {
+            return {};
+        }
+    })();
+    // Robust fallback for userName
+    const userName = user.name || user.fullName || user.username || user.mobile || 'Customer';
     useEffect(() => {
         const fetchStops = async () => {
             try {
@@ -82,6 +93,11 @@ export const BookingConfirmation = () => {
                                     amount: totalPrice,
                                     paymentMethod: 'Mobile Money',
                                     customerPhone: phoneNumber,
-                                    route: { departureTime: bus.departureTime }
+                                    customerName: userName, // Add passenger name
+                                    vendorName: bus.company, // Add vendor name
+                                    route: {
+                                        departureTime: bus.departureTime,
+                                        estimatedArrival: bus.arrivalTime // Add arrival time
+                                    }
                                 }, onDownload: handleExportPDF, isExporting: isExporting }) }), _jsx("div", { className: "flex justify-center", children: _jsx("button", { onClick: () => navigate('/'), className: "px-4 sm:px-6 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base", children: "Book Another Trip" }) })] })] }) }));
 };

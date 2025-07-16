@@ -29,7 +29,20 @@ const ETicketPage = () => {
             try {
                 if (typeof bookingReference === 'string') {
                     const response = await tickets.getByReference(bookingReference);
-                    setTicket(response.data);
+                    let ticketData = response.data;
+                    // If vendor name is missing, fetch it using vendorId
+                    if (!ticketData.vendorName && ticketData.vendorId) {
+                        try {
+                            const vendorRes = await api.get(`/vendors/${ticketData.vendorId}`);
+                            const vendorName = vendorRes.data.name;
+                            ticketData = { ...ticketData, vendorName };
+                        }
+                        catch (err) {
+                            // If vendor fetch fails, fallback to default
+                            ticketData = { ...ticketData };
+                        }
+                    }
+                    setTicket(ticketData);
                 }
                 else {
                     setError('Invalid ticket reference.');
