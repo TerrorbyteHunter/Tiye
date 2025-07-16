@@ -5,6 +5,54 @@ import ETicket from './ETicket';
 import html2pdf from 'html2pdf.js';
 import api from '../lib/api';
 
+// Dedicated export/print component for robust PDF export
+const ETicketExport: React.FC<{ ticket: any }> = ({ ticket }) => (
+  <div style={{ fontFamily: 'Roboto, Arial, sans-serif', width: 600, margin: '0 auto', background: '#fff', borderRadius: 16, border: '1px solid #e5e7eb', boxShadow: '0 2px 8px #0001', padding: 32 }}>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet" />
+    <div style={{ background: '#2563eb', color: '#fff', borderRadius: 12, padding: 24, marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: 22, letterSpacing: 1 }}>ZAMBIA INTERCITY EXPRESS</div>
+        <div style={{ fontWeight: 700, fontSize: 20, marginTop: 8 }}>E-Ticket</div>
+        <div style={{ fontSize: 13, opacity: 0.9, marginTop: 2 }}>Booking Ref: {ticket.bookingReference}</div>
+      </div>
+      <div>
+        {/* QR code (optional, can use a library or image) */}
+      </div>
+    </div>
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 16, marginBottom: 8 }}>Trip Details</div>
+      <table style={{ width: '100%', fontSize: 15, marginBottom: 8 }}>
+        <tbody>
+          <tr><td>From:</td><td style={{ fontWeight: 500 }}>{ticket.departure || ticket.route?.departure}</td></tr>
+          <tr><td>To:</td><td style={{ fontWeight: 500 }}>{ticket.destination || ticket.route?.destination}</td></tr>
+          <tr><td>Date:</td><td>{ticket.travelDate ? new Date(ticket.travelDate).toLocaleDateString('en-GB') : ''}</td></tr>
+          <tr><td>Seat:</td><td>{ticket.seatNumber}</td></tr>
+          <tr><td>Departure:</td><td>{ticket.route?.departureTime}</td></tr>
+          <tr><td>Arrival:</td><td>{ticket.route?.estimatedArrival}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 16, marginBottom: 8 }}>Payment Details</div>
+      <table style={{ width: '100%', fontSize: 15 }}>
+        <tbody>
+          <tr><td>Amount:</td><td style={{ fontWeight: 700 }}>K {ticket.amount}</td></tr>
+          <tr><td>Method:</td><td>{ticket.paymentMethod || 'Mobile Money'}</td></tr>
+          <tr><td>Passenger:</td><td>{ticket.customerName}</td></tr>
+          <tr><td>Phone/Email:</td><td>{ticket.customerPhone || ticket.customerEmail}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 15, marginBottom: 6 }}>Important Information</div>
+    <ul style={{ fontSize: 14, color: '#374151', marginBottom: 0, paddingLeft: 18 }}>
+      <li>Please arrive at the bus station 30 minutes before departure time</li>
+      <li>Baggage allowance: 20kg per passenger</li>
+      <li>No smoking or alcohol consumption on board</li>
+      <li>Pets are not allowed on the bus</li>
+    </ul>
+  </div>
+);
+
 const ETicketPage: React.FC = () => {
   const { bookingReference } = useParams();
   const [ticket, setTicket] = useState<any>(null);
@@ -12,6 +60,7 @@ const ETicketPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const ticketRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [review, setReview] = useState<any>(null);
   const [showRating, setShowRating] = useState(false);
@@ -112,17 +161,24 @@ const ETicketPage: React.FC = () => {
   };
 
   const handleExportPDF = async () => {
-    if (!ticketRef.current) return;
+    if (!exportRef.current) return;
     setIsExporting(true);
     try {
+      // Wait for fonts to load
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      // Wait for images (if any)
+      const imgs = exportRef.current.querySelectorAll('img');
+      await Promise.all(Array.from(imgs).map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; })));
       const opt = {
-        margin: 1,
+        margin: 0.5,
         filename: `ticket-${ticket.bookingReference}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' as const }
       };
-      await html2pdf().set(opt).from(ticketRef.current).save();
+      await html2pdf().set(opt).from(exportRef.current).save();
     } catch (error) {
       // handle error
     } finally {
@@ -140,6 +196,10 @@ const ETicketPage: React.FC = () => {
         <button onClick={() => navigate(-1)} className="mb-4 px-4 py-2 bg-gray-200 rounded">Back</button>
         <div ref={ticketRef}>
           <ETicket ticket={ticket} />
+        </div>
+        {/* Hidden export/print area: only ETicketExport, no download button or extra UI */}
+        <div ref={exportRef} style={{ position: 'absolute', left: '-9999px', top: 0, width: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
+          <ETicketExport ticket={ticket} />
         </div>
         {/* Rating UI */}
         {showRating && (
@@ -198,7 +258,7 @@ const ETicketPage: React.FC = () => {
           <button
             onClick={handleExportPDF}
             disabled={isExporting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 print:hidden"
           >
             {isExporting ? 'Exporting...' : 'Download'}
           </button>

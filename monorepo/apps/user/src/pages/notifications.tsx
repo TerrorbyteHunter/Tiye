@@ -68,6 +68,9 @@ const NotificationsPage: React.FC = () => {
 
   const unreadCount = Array.isArray(notifications) ? notifications.filter((n) => n.status !== 'read').length : 0;
 
+  // Sort notifications by created_at descending (latest first)
+  const sortedNotifications = [...notifications].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-2 sm:px-6 lg:px-8">
       {/* Header */}
@@ -114,7 +117,7 @@ const NotificationsPage: React.FC = () => {
         <div className="text-center py-12 text-gray-500">No notifications</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {notifications.map((n, i) => (
+          {sortedNotifications.map((n, i) => (
             <div
               key={n.id}
               className={`rounded-xl p-4 shadow-md border flex items-start gap-3 cursor-pointer transition-all duration-200 relative bg-white hover:shadow-lg hover:-translate-y-0.5 ${
