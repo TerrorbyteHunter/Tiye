@@ -35,9 +35,9 @@ const TicketList: React.FC = () => {
     
     fetchTickets();
     
-    // Auto-refresh every 30 seconds to catch new bookings
-    const interval = setInterval(fetchTickets, 30000);
-    return () => clearInterval(interval);
+    // Removed setInterval auto-refresh
+    // const interval = setInterval(fetchTickets, 30000);
+    // return () => clearInterval(interval);
   }, []);
 
   const fetchTickets = async (showRefreshing = false) => {
@@ -89,18 +89,35 @@ const TicketList: React.FC = () => {
     }
   };
 
-  const formatTime = (timeString: string) => {
+  // Fix: Combine travelDate and time if time is not a full ISO string
+  const formatTime = (travelDate: string | Date | undefined, timeString: string | undefined) => {
     if (!timeString) return 'N/A';
-    try {
-      const date = new Date(timeString);
-      return date.toLocaleTimeString('en-GB', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-      });
-    } catch {
+    let dateObj;
+    let dateStr = '';
+    if (travelDate instanceof Date) {
+      // Convert Date object to YYYY-MM-DD
+      dateStr = travelDate.toISOString().slice(0, 10);
+    } else if (typeof travelDate === 'string') {
+      // If already string, check if it's a valid date string
+      if (/^\d{4}-\d{2}-\d{2}$/.test(travelDate)) {
+        dateStr = travelDate;
+      } else {
+        // Try to parse and format
+        const d = new Date(travelDate);
+        if (!isNaN(d.getTime())) {
+          dateStr = d.toISOString().slice(0, 10);
+        }
+      }
+    }
+    if (timeString.length > 8) {
+      dateObj = new Date(timeString);
+    } else if (dateStr) {
+      dateObj = new Date(`${dateStr}T${timeString}`);
+    } else {
       return timeString;
     }
+    if (isNaN(dateObj.getTime())) return 'Invalid Date';
+    return dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
   if (loading) {
@@ -224,7 +241,7 @@ const TicketList: React.FC = () => {
                   <div className="flex flex-wrap gap-2 text-xs text-gray-700 mb-1 sm:gap-4 sm:text-sm sm:mb-2">
                     <div className="flex items-center gap-1"><User2 className="h-3 w-3 text-blue-500 sm:h-4 sm:w-4" /> Seat: <span className="font-semibold">{ticket.seatNumber}</span></div>
                     <div className="flex items-center gap-1 text-green-700"><span className="font-semibold">Amount:</span> <span className="font-bold">K {ticket.amount}</span></div>
-                    <div className="flex items-center gap-1"><Clock className="h-3 w-3 text-purple-500 sm:h-4 sm:w-4" /> {ticket.route?.departureTime ? formatTime(ticket.route.departureTime) : ''}</div>
+                    <div className="flex items-center gap-1"><Clock className="h-3 w-3 text-purple-500 sm:h-4 sm:w-4" /> {ticket.route?.departureTime ? formatTime(ticket.travelDate, ticket.route.departureTime) : ''}</div>
                   </div>
                   {/* Status Badge */}
                   <div className="flex items-center gap-2 mt-1 sm:mt-2">

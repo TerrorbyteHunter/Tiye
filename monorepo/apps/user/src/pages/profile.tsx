@@ -41,15 +41,30 @@ const ProfileMain: React.FC = () => {
     navigate('/login');
   };
 
+  // Add avatar selection logic
+  const avatarOptions = [
+    '/images/Avatar/avatar1.png',
+    '/images/Avatar/avatar2.png',
+    '/images/Avatar/avatar3.png',
+    '/images/Avatar/avatar4.png',
+    '/images/Avatar/avatar5.png',
+    '/images/Avatar/avatar6.png',
+  ];
+  const avatar = localStorage.getItem('selectedAvatar') || avatarOptions[0];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-white py-10 px-2">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <User2 className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-200 shadow">
+            <User2 className="h-7 w-7 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Profile</h1>
+            <div className="h-1 w-24 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 mt-1 shadow" />
+          </div>
         </div>
-        <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-8" />
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading profile...</div>
         ) : error ? (
@@ -58,8 +73,8 @@ const ProfileMain: React.FC = () => {
           <>
             {/* User Info Card */}
             <div className="flex flex-col items-center bg-white rounded-2xl shadow-xl border border-blue-100 p-8 mb-8">
-              <img src="/images/avatar.png" alt="User Avatar" className="w-28 h-28 rounded-full border-4 border-blue-400 mb-3 shadow" />
-              <h2 className="text-2xl font-bold text-gray-900">{profile?.fullName || profile?.name || 'User'}</h2>
+              <img src={avatar} alt="User Avatar" className="w-28 h-28 rounded-full border-4 border-blue-400 mb-3 shadow" />
+              <h2 className="text-2xl font-bold text-gray-900">{profile?.fullName || profile?.name || ''}</h2>
               <p className="text-gray-500 text-base">{profile?.email || ''}</p>
             </div>
             {/* Quick Actions Grid */}

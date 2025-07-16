@@ -9,6 +9,7 @@ const SignupPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -16,8 +17,12 @@ const SignupPage: React.FC = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!username.trim() || !mobile.trim() || !password.trim()) {
+    if (!username.trim() || !mobile.trim() || !password.trim() || !confirmPassword.trim()) {
       setError('All fields are required.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
     setLoading(true);
@@ -130,6 +135,20 @@ const SignupPage: React.FC = () => {
                 onChange={e => setPassword(e.target.value)}
                 className="w-full px-2 py-2 bg-transparent focus:outline-none rounded-xl"
                 placeholder="Enter your password"
+                autoComplete="new-password"
+              />
+            </div>
+          </div>
+          <div className="relative">
+            <label className="block text-gray-700 font-semibold mb-1">Confirm Password</label>
+            <div className="flex items-center bg-white rounded-xl border border-blue-200 focus-within:ring-2 focus-within:ring-blue-400 transition px-3">
+              <FaLock className="text-blue-400 mr-2" />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full px-2 py-2 bg-transparent focus:outline-none rounded-xl"
+                placeholder="Confirm your password"
                 autoComplete="new-password"
               />
             </div>

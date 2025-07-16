@@ -369,12 +369,10 @@ app.post('/api/tickets', async (req, res) => {
         console.log('Ticket inserted:', result.rows[0]);
         // Send response immediately after booking
         res.json(result.rows[0]);
-        // Try to insert notification, but don't block or error if it fails
-        pool.query('INSERT INTO notifications (user_id, message, read) VALUES ($1, $2, $3) RETURNING *', [userId, 'Your booking was successful!', false]).then(notifResult => {
-            console.log('Notification inserted:', notifResult.rows[0]);
-        }).catch(err => {
-            console.error('Notification insert failed:', err);
-        });
+        // Insert a compact, rich notification (async, non-blocking)
+        const notifMsg = `Booking confirmed: Seat ${seatNumber} on route ${routeId} for ${travelDate}.`;
+        pool.query(`INSERT INTO notifications (user_id, type, title, message, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())`, [userId, 'info', 'Booking Confirmed', notifMsg, 'unread']).catch(err => console.error('Notification insert failed:', err));
     }
     catch (err) {
         console.error('Create ticket error:', err);

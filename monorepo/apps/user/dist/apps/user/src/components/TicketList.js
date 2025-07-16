@@ -22,9 +22,9 @@ const TicketList = () => {
         })();
         setUserInfo(user);
         fetchTickets();
-        // Auto-refresh every 30 seconds to catch new bookings
-        const interval = setInterval(fetchTickets, 30000);
-        return () => clearInterval(interval);
+        // Removed setInterval auto-refresh
+        // const interval = setInterval(fetchTickets, 30000);
+        // return () => clearInterval(interval);
     }, []);
     const fetchTickets = async (showRefreshing = false) => {
         try {
@@ -72,20 +72,41 @@ const TicketList = () => {
             setRefreshing(false);
         }
     };
-    const formatTime = (timeString) => {
+    // Fix: Combine travelDate and time if time is not a full ISO string
+    const formatTime = (travelDate, timeString) => {
         if (!timeString)
             return 'N/A';
-        try {
-            const date = new Date(timeString);
-            return date.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
+        let dateObj;
+        let dateStr = '';
+        if (travelDate instanceof Date) {
+            // Convert Date object to YYYY-MM-DD
+            dateStr = travelDate.toISOString().slice(0, 10);
         }
-        catch {
+        else if (typeof travelDate === 'string') {
+            // If already string, check if it's a valid date string
+            if (/^\d{4}-\d{2}-\d{2}$/.test(travelDate)) {
+                dateStr = travelDate;
+            }
+            else {
+                // Try to parse and format
+                const d = new Date(travelDate);
+                if (!isNaN(d.getTime())) {
+                    dateStr = d.toISOString().slice(0, 10);
+                }
+            }
+        }
+        if (timeString.length > 8) {
+            dateObj = new Date(timeString);
+        }
+        else if (dateStr) {
+            dateObj = new Date(`${dateStr}T${timeString}`);
+        }
+        else {
             return timeString;
         }
+        if (isNaN(dateObj.getTime()))
+            return 'Invalid Date';
+        return dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
     };
     if (loading) {
         return (_jsx("div", { className: "min-h-screen bg-gray-50 py-8", children: _jsx("div", { className: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8", children: _jsx("div", { className: "flex items-center justify-center py-12", children: _jsxs("div", { className: "flex items-center space-x-2", children: [_jsx(RefreshCw, { className: "h-6 w-6 animate-spin text-blue-600" }), _jsx("span", { className: "text-gray-600", children: "Loading your bookings..." })] }) }) }) }));
@@ -100,7 +121,7 @@ const TicketList = () => {
                             statusColor = 'bg-green-100 text-green-800 border-green-300';
                         if (ticket.status === 'cancelled' || ticket.status === 'refunded')
                             statusColor = 'bg-red-100 text-red-800 border-red-300';
-                        return (_jsxs("div", { className: "relative bg-white rounded-2xl shadow-lg border-l-8 border-blue-500 flex flex-col gap-2 p-3 min-h-[120px] hover:shadow-2xl transition-shadow sm:gap-4 sm:p-6 sm:min-h-[220px]", children: [_jsxs("div", { className: "mb-1 w-full sm:mb-2", children: [_jsxs("span", { className: "font-bold text-base text-blue-700 block sm:text-lg", children: [ticket.departure || ticket.route?.departure, " ", _jsx("span", { className: "mx-1", children: "\u2192" }), " ", ticket.destination || ticket.route?.destination] }), _jsxs("span", { className: "flex items-center gap-1 text-gray-500 text-sm whitespace-nowrap mt-0.5 sm:text-base sm:mt-1", children: [_jsx(CalendarDays, { className: "h-4 w-4 text-green-500 sm:h-5 sm:w-5" }), _jsx("span", { className: "font-semibold", children: ticket.travelDate ? new Date(ticket.travelDate).toLocaleDateString('en-GB') : 'N/A' })] })] }), _jsxs("div", { className: "flex flex-wrap gap-2 text-xs text-gray-700 mb-1 sm:gap-4 sm:text-sm sm:mb-2", children: [_jsxs("div", { className: "flex items-center gap-1", children: [_jsx(User2, { className: "h-3 w-3 text-blue-500 sm:h-4 sm:w-4" }), " Seat: ", _jsx("span", { className: "font-semibold", children: ticket.seatNumber })] }), _jsxs("div", { className: "flex items-center gap-1 text-green-700", children: [_jsx("span", { className: "font-semibold", children: "Amount:" }), " ", _jsxs("span", { className: "font-bold", children: ["K ", ticket.amount] })] }), _jsxs("div", { className: "flex items-center gap-1", children: [_jsx(Clock, { className: "h-3 w-3 text-purple-500 sm:h-4 sm:w-4" }), " ", ticket.route?.departureTime ? formatTime(ticket.route.departureTime) : ''] })] }), _jsx("div", { className: "flex items-center gap-2 mt-1 sm:mt-2", children: _jsx("span", { className: `border ${statusColor} rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide sm:px-3 sm:py-1 sm:text-xs`, children: ticket.status || 'PENDING' }) }), _jsx("button", { onClick: () => navigate(`/my-bookings/${ticket.bookingReference}`), className: "w-full mt-auto py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold shadow hover:from-blue-700 hover:to-purple-700 transition-colors text-sm sm:py-2 sm:text-base", children: "View E-ticket" })] }, ticket.id || idx));
+                        return (_jsxs("div", { className: "relative bg-white rounded-2xl shadow-lg border-l-8 border-blue-500 flex flex-col gap-2 p-3 min-h-[120px] hover:shadow-2xl transition-shadow sm:gap-4 sm:p-6 sm:min-h-[220px]", children: [_jsxs("div", { className: "mb-1 w-full sm:mb-2", children: [_jsxs("span", { className: "font-bold text-base text-blue-700 block sm:text-lg", children: [ticket.departure || ticket.route?.departure, " ", _jsx("span", { className: "mx-1", children: "\u2192" }), " ", ticket.destination || ticket.route?.destination] }), _jsxs("span", { className: "flex items-center gap-1 text-gray-500 text-sm whitespace-nowrap mt-0.5 sm:text-base sm:mt-1", children: [_jsx(CalendarDays, { className: "h-4 w-4 text-green-500 sm:h-5 sm:w-5" }), _jsx("span", { className: "font-semibold", children: ticket.travelDate ? new Date(ticket.travelDate).toLocaleDateString('en-GB') : 'N/A' })] })] }), _jsxs("div", { className: "flex flex-wrap gap-2 text-xs text-gray-700 mb-1 sm:gap-4 sm:text-sm sm:mb-2", children: [_jsxs("div", { className: "flex items-center gap-1", children: [_jsx(User2, { className: "h-3 w-3 text-blue-500 sm:h-4 sm:w-4" }), " Seat: ", _jsx("span", { className: "font-semibold", children: ticket.seatNumber })] }), _jsxs("div", { className: "flex items-center gap-1 text-green-700", children: [_jsx("span", { className: "font-semibold", children: "Amount:" }), " ", _jsxs("span", { className: "font-bold", children: ["K ", ticket.amount] })] }), _jsxs("div", { className: "flex items-center gap-1", children: [_jsx(Clock, { className: "h-3 w-3 text-purple-500 sm:h-4 sm:w-4" }), " ", ticket.route?.departureTime ? formatTime(ticket.travelDate, ticket.route.departureTime) : ''] })] }), _jsx("div", { className: "flex items-center gap-2 mt-1 sm:mt-2", children: _jsx("span", { className: `border ${statusColor} rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide sm:px-3 sm:py-1 sm:text-xs`, children: ticket.status || 'PENDING' }) }), _jsx("button", { onClick: () => navigate(`/my-bookings/${ticket.bookingReference}`), className: "w-full mt-auto py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold shadow hover:from-blue-700 hover:to-purple-700 transition-colors text-sm sm:py-2 sm:text-base", children: "View E-ticket" })] }, ticket.id || idx));
                     }) })) })] }));
 };
 export default TicketList;

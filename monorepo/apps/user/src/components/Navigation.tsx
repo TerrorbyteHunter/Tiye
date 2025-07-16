@@ -9,7 +9,10 @@ export const Navigation: React.FC = () => {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const unreadCount = Array.isArray(notifications) ? notifications.filter(n => n.status !== 'read').length : 0;
+  const unreadCount = Array.isArray(notifications)
+    ? notifications.filter(n => !n.status || n.status.toLowerCase() !== 'read').length
+    : 0;
+  console.log('Unread notifications:', unreadCount, notifications);
 
   // Fetch notifications from backend
   const fetchNotifications = async () => {
@@ -51,9 +54,6 @@ export const Navigation: React.FC = () => {
     }
   };
 
-  // Don't show navigation on home page
-  if (location.pathname === '/') return null;
-
   return (
     <>
       <nav className="bg-white shadow-lg fixed w-full z-50">
@@ -88,9 +88,7 @@ export const Navigation: React.FC = () => {
                 <Bell className="w-5 h-5" />
                 {/* No text on mobile, no 'Notifications' word */}
                 {/* Notification badge */}
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{unreadCount}</span>
-                )}
+                <span className={`absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none rounded-full transition-colors ${unreadCount > 0 ? 'bg-red-600 text-white' : 'bg-gray-300 text-gray-600 opacity-70'}`}>{unreadCount}</span>
               </button>
               <button
                 className="hidden sm:flex bg-white bg-opacity-80 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow hover:bg-red-100 text-red-600 font-semibold items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
